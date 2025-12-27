@@ -6,6 +6,12 @@ import os
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
+# Проверка наличия ключей
+if not TELEGRAM_TOKEN:
+    raise ValueError("❌ TELEGRAM_TOKEN не найден!")
+if not OPENROUTER_API_KEY:
+    raise ValueError("❌ OPENROUTER_API_KEY не найден!")
+
 # ========== СИСТЕМНЫЙ ПРОМПТ ДЛЯ БОТА ==========
 SYSTEM_PROMPT = """Ты — помощник врача, специализирующийся на кодировании диагнозов по МКБ-10 (Международная классификация болезней, 10-й пересмотр).
 
@@ -30,7 +36,6 @@ K91.5, K29.6, K21.9, K29.5, A04.9?
 ПХЭС. ДГР. Рефлюкс-гастрит, обострение. СИБР?
 
 Отвечай ТОЛЬКО в этом формате. Не добавляй пояснения или комментарии."""
-# ===============================================
 
 # Инициализация бота
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
@@ -74,19 +79,34 @@ def handle_message(message):
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": message.text}
             ],
-            temperature=0.1
+            temperature=0.1,
+            max_tokens=500
         )
         
         # Получаем ответ
         answer = response.choices[0].message.content
         
-        # Отправляем ответ
-        bot.reply_to(message, f"``````", parse_mode='Markdown')
+        # ВАЖНО: Проверяем, что ответ не пустой
+        if not answer or answer.strip() == "":
+            bot.reply_to(message, "❌ AI вернул пустой ответ. Попробуйте переформулировать диагноз.")
+            print(f"ОШИБКА: Пустой ответ от AI для запроса: {message.text}")
+            return
+        
+        # Отправляем ответ (обычным текстом, без Markdown для надежности)
+        bot.reply_to(message, answer)
+        
+        # Логируем для отладки
+        print(f"✅ Запрос: {message.text}")
+        print(f"✅ Ответ: {answer}")
         
     except Exception as e:
-        bot.reply_to(message, f"❌ Ошибка: {str(e)}")
-        print(f"Ошибка: {e}")
+        error_msg = f"❌ Ошибка: {str(e)}"
+        bot.reply_to(message, error_msg)
+        print(f"ОШИБКА: {e}")
+        print(f"Запрос был: {message.text}")
 
 # Запуск бота
 print("🤖 Бот МКБ-10 запущен!")
+print(f"✅ TELEGRAM_TOKEN установлен: {bool(TELEGRAM_TOKEN)}")
+print(f"✅ OPENROUTER_API_KEY установлен: {bool(OPENROUTER_API_KEY)}")
 bot.polling(none_stop=True)
