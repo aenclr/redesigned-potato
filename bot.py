@@ -59,7 +59,7 @@ def handle_message(message):
         
         # Отправляем запрос в AI
         response = client.chat.completions.create(
-        model="xiaomi/mimo-v2-flash",
+        model="xiaomi/mimo-v2-flash:free",
 
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
@@ -96,6 +96,7 @@ print("🤖 Бот МКБ-10 запущен!")
 print(f"✅ TELEGRAM_TOKEN установлен: {bool(TELEGRAM_TOKEN)}")
 print(f"✅ OPENROUTER_API_KEY установлен: {bool(OPENROUTER_API_KEY)}")
 bot.polling(none_stop=True)
+
 
 
 
