@@ -40,9 +40,7 @@ def send_long_message(chat_id, text):
 # Обработчик команды /start
 @bot.message_handler(commands=['start'])
 def start(message):
-    welcome_text = """👋 Добрый ассистент
-
-Задайте любой вопрос — отвечу в деловом стиле, кратко и вежливо."""
+    welcome_text = """ ассистент"""
     
     bot.reply_to(message, welcome_text)
 
@@ -91,3 +89,4 @@ print("🤖 Бот-ассистент запущен!")
 print(f"✅ TELEGRAM_TOKEN установлен: {bool(TELEGRAM_TOKEN)}")
 print(f"✅ OPENROUTER_API_KEY установлен: {bool(OPENROUTER_API_KEY)}")
 bot.polling(none_stop=True)
+
